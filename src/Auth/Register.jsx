@@ -1,42 +1,37 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import emailjs from "@emailjs/browser";
 
 function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const SERVICE_ID = "service_4he2lwd";
-  const TEMPLATE_ID = "template_mzh67af";
-  const PUBLIC_KEY = "Uhk2tV_iOwFev25Qa";
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    if (users.find(u => u.email === form.email)) {
-      alert("Email already registered!");
-      return;
-    }
-    users.push(form);
-    localStorage.setItem("users", JSON.stringify(users));
-    const templateParams = {
-      name: form.name,
-      email: form.email,
-    };
 
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
-      .then(() => {
-        alert("Registered successfully! Welcome email sent.");
-        navigate("/login");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Registered successfully! But email failed to send.");
-        navigate("/login");
+    try {
+      // ✅ Correct API route
+      const res = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      alert("Registered successfully!");
+      navigate("/login");
+    } catch (err) {
+      alert("Server error");
+      console.error(err);
+    }
   };
 
   return (

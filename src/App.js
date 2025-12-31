@@ -1,9 +1,9 @@
 import './App.css';
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter , Routes, Route } from "react-router-dom";
 import Login from './Auth/Login';
 import Register from './Auth/Register';
-import HomePage from './components/Home';
+import Home from './components/Home';
 import About from './components/About';
 import Contact from './components/Contact';
 import Offers from './components/Offers';
@@ -15,7 +15,7 @@ function App() {
 
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   return (
-    <Router>
+    <BrowserRouter>
       {/* Fixed Navbar at the top */}
       
 
@@ -25,7 +25,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/home" element={<HomePage cart={cart} setCart={setCart} />} />
+          <Route path="/home" element={<Home cart={cart} setCart={setCart} />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/services" element={<Services />} />
@@ -36,7 +36,7 @@ function App() {
 />
         </Routes>
       </div>
-    </Router>
+    </BrowserRouter>
   );
 }
 

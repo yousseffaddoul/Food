@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "./Navbar";
+
 
 const categories = ["Appetizers", "Soups", "Main courses", "Pizza", "More"];
 
@@ -28,64 +28,70 @@ const products = {
   ],
 };
 
-function HomePage() {
+function Home() {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Appetizers");
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
+  // ✅ AUTH CHECK (FIXED)
   useEffect(() => {
-    const auth = localStorage.getItem("auth");
-    if (!auth) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/login");
     } else {
       setIsAuthChecked(true);
     }
   }, [navigate]);
 
+  // ✅ CART LOGIC
   const addToCart = (item) => {
     const exists = cart.find((p) => p.id === item.id);
     if (exists) {
-      setCart(cart.map((p) => (p.id === item.id ? { ...p, qty: p.qty + 1 } : p)));
+      setCart(
+        cart.map((p) =>
+          p.id === item.id ? { ...p, qty: p.qty + 1 } : p
+        )
+      );
     } else {
       setCart([...cart, { ...item, qty: 1 }]);
     }
   };
-  const removeFromCart = (id) => setCart(cart.filter((p) => p.id !== id));
+
+  const removeFromCart = (id) => {
+    setCart(cart.filter((p) => p.id !== id));
+  };
+
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  if (!isAuthChecked) return <Navbar />;
+  if (!isAuthChecked) return null;
 
   return (
     <div
       className="w-full min-h-screen bg-cover bg-center relative"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80')",
+          "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1470&q=80')",
       }}
     >
       <div className="absolute inset-0 bg-black/40"></div>
+
       <div className="relative z-10 w-full min-h-screen">
+        
+
+        {/* TOP MENU */}
         <div className="w-full flex justify-end items-center gap-6 p-4 shadow bg-gray-50/80">
-          <Link to="/home" className="text-gray-700 hover:text-orange-500 font-medium">
-            Home
-          </Link>
-          <Link to="/about" className="text-gray-700 hover:text-orange-500 font-medium">
-            About
-          </Link>
-          <Link to="/contact" className="text-gray-700 hover:text-orange-500 font-medium">
-            Contact
-          </Link>
-          <Link to="/services" className="text-gray-700 hover:text-orange-500 font-medium">
-            Services
-          </Link>
-          <Link to="/offers" className="text-gray-700 hover:text-orange-500 font-medium">
-            Offers
-          </Link>
+          <Link to="/home" className="text-gray-700 hover:text-orange-500 font-medium">Home</Link>
+          <Link to="/about" className="text-gray-700 hover:text-orange-500 font-medium">About</Link>
+          <Link to="/contact" className="text-gray-700 hover:text-orange-500 font-medium">Contact</Link>
+          <Link to="/services" className="text-gray-700 hover:text-orange-500 font-medium">Services</Link>
+          <Link to="/offers" className="text-gray-700 hover:text-orange-500 font-medium">Offers</Link>
+
           <button
             className="bg-red-500 text-white px-4 py-2 rounded-lg"
             onClick={() => {
-              localStorage.removeItem("auth");
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
               navigate("/login");
             }}
           >
@@ -94,6 +100,7 @@ function HomePage() {
         </div>
 
         <div className="p-4 md:p-10 flex flex-col md:flex-row gap-8">
+          {/* LEFT */}
           <div className="flex-1">
             <div className="flex gap-3 mb-6 overflow-x-auto">
               {categories.map((cat) => (
@@ -111,23 +118,37 @@ function HomePage() {
               ))}
             </div>
 
-            <h2 className="text-3xl font-semibold mb-4 text-white">{selectedCategory}</h2>
+            <h2 className="text-3xl font-semibold mb-4 text-white">
+              {selectedCategory}
+            </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {products[selectedCategory].map((item) => (
-                <div key={item.id} className="shadow rounded-xl p-3 bg-white/90 backdrop-blur-sm">
-                  <img src={item.img} alt={item.name} className="rounded-lg w-full h-40 object-cover" />
+                <div
+                  key={item.id}
+                  className="shadow rounded-xl p-3 bg-white/90 backdrop-blur-sm"
+                >
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    className="rounded-lg w-full h-40 object-cover"
+                  />
+
                   <h3 className="font-semibold mt-3">{item.name}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                    {item.tags.map((t, index) => (
-                      <span key={index} className="flex items-center gap-1">
-                        {t === "Spicy" && "🌶️"}
-                        {t === "Gluten" && "🍞"}
-                        {t === "Bestseller" && "⭐"}
+
+                  <div className="flex gap-2 text-sm text-gray-500 mt-1">
+                    {item.tags.map((t, i) => (
+                      <span key={i}>
+                        {t === "Spicy" && "🌶️ "}
+                        {t === "Gluten" && "🍞 "}
+                        {t === "Bestseller" && "⭐ "}
                         {t}
                       </span>
                     ))}
                   </div>
+
                   <p className="font-semibold mt-3">${item.price.toFixed(2)}</p>
+
                   <button
                     onClick={() => addToCart(item)}
                     className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg mt-3"
@@ -138,6 +159,8 @@ function HomePage() {
               ))}
             </div>
           </div>
+
+          {/* RIGHT CART */}
           <div className="w-full md:w-80 bg-gray-50/90 shadow-xl p-6 rounded-2xl h-fit sticky top-4">
             <h3 className="text-2xl font-bold mb-4">Your order</h3>
 
@@ -145,17 +168,15 @@ function HomePage() {
               <p className="text-gray-500">Your cart is empty.</p>
             ) : (
               cart.map((item) => (
-                <div key={item.id} className="flex justify-between items-center mb-2">
-                  <p>
-                    {item.qty} × {item.name}
-                  </p>
+                <div key={item.id} className="flex justify-between mb-2">
+                  <p>{item.qty} × {item.name}</p>
                   <div className="flex gap-2 items-center">
                     <p>${(item.price * item.qty).toFixed(2)}</p>
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:underline text-sm"
+                      className="text-red-500 text-sm"
                     >
-                      ❌ Cancel
+                      ❌
                     </button>
                   </div>
                 </div>
@@ -170,15 +191,11 @@ function HomePage() {
             </div>
 
             <button
-              onClick={() =>
-                navigate("/checkout", {
-                  state: { cart: cart, total: total },
-                })
-              }
               disabled={cart.length === 0}
+              onClick={() => navigate("/checkout", { state: { cart, total } })}
               className={`w-full mt-4 py-3 rounded-lg text-lg ${
                 cart.length === 0
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  ? "bg-gray-300 cursor-not-allowed"
                   : "bg-orange-500 hover:bg-orange-600 text-white"
               }`}
             >
@@ -191,4 +208,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default Home;
